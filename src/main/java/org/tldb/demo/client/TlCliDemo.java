@@ -1,4 +1,5 @@
 package org.tldb.demo.client;
+
 import io.github.donnie4w.tldb.tlcli.*;
 
 import java.nio.charset.StandardCharsets;
@@ -13,19 +14,17 @@ public class TlCliDemo {
 
     public static void main(String[] args) throws Exception {
         Client client = new Client();
-        client.newConnect(true, "192.168.2.108", 7100, "mycli=123");
+        client.newConnect(false, "127.0.0.1", 7100, "mycli=123");
         //建表
         client.createTable("school", new String[]{"classroom", "teacher", "student"}, new String[]{"classroom", "teacher"});
-       //新增数据
-        for (int i = 0; i < 10; i++) {
-            Map<String, byte[]> m = new HashMap<>();
-            m.put("classroom", ("class" + i).getBytes(StandardCharsets.UTF_8));
-            m.put("teacher", ("teacher" + i).getBytes(StandardCharsets.UTF_8));
-            m.put("student", ("student" + i).getBytes(StandardCharsets.UTF_8));
-            client.insert("school", m);
-        }
+
+        //新增数据
+        insert(client,1);
+
+//        update(client, 1, 33);
+
         //表当前最大id
-        System.out.println("selectId>>"+client.selectId("school"));
+        System.out.println("selectId>>" + client.selectId("school"));
 
         //根据Id值查询
         DataBean db = client.selectById("school", 1);
@@ -51,7 +50,33 @@ public class TlCliDemo {
             }
         }
 
+        //删除数据
+//        delete(client, 1);
 
         Thread.sleep(60 * 1000);
     }
+
+    public static long insert(Client client, int i) throws TlException {
+        Map<String, byte[]> m = new HashMap<>();
+        m.put("classroom", ("class" + i).getBytes(StandardCharsets.UTF_8));
+        m.put("teacher", ("teacher" + i).getBytes(StandardCharsets.UTF_8));
+        m.put("student", ("student" + i).getBytes(StandardCharsets.UTF_8));
+        AckBean ab = client.insert("school", m);
+        return ab.seq;
+    }
+
+
+    public static void update(Client client, long id, int i) throws TlException {
+        Map<String, byte[]> m = new HashMap<>();
+        m.put("classroom", ("class" + i).getBytes(StandardCharsets.UTF_8));
+        m.put("teacher", ("teacher" + i).getBytes(StandardCharsets.UTF_8));
+        m.put("student", ("student" + i).getBytes(StandardCharsets.UTF_8));
+        AckBean ab = client.update("school", id, m);
+    }
+
+    public static void delete(Client client, long id) throws TlException {
+        AckBean ab = client.delete("school", id);
+        System.out.println(ab.ack.ok);
+    }
+
 }
