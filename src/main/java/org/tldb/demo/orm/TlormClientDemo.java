@@ -17,10 +17,22 @@ public class TlormClientDemo {
     public static void main(String[] args) throws TlException {
         Orm.registerDefaultResource(false, "127.0.0.1", 7100, "mycli=123");
         UserInfo u = new UserInfo();
-        u.createTable();
-        long seq = u.insert(new UserInfo(0,"tom",22,"aaaa".getBytes(StandardCharsets.UTF_8),1.22f, (byte) 1,(char)222));
+        u.createTable();//创建表userinfo
+
+        u.age = 22;
+        u.achi = 1.22f;
+        u.char1 = (char)222;
+        u.desc = "aaaa".getBytes(StandardCharsets.UTF_8);
+        u.gender = 1;
+        u.achi = 2.33f;
+        u.name = "tom";
+        long seq = u.insert();//新增数据
+
         System.out.println("seq--->"+seq);
-        u.update(new UserInfo(1, "jerry", 22, "bbbb".getBytes(StandardCharsets.UTF_8), 1.22f, (byte) 1,(char)333));
+        u.name = "jerry";
+        u.desc = "bbbbb".getBytes(StandardCharsets.UTF_8);
+        u.update();//更新数据
+
         System.out.println(u.selectById(1));
         System.out.println("————————————————————————————————————————————————");
         List<UserInfo> uis =u.selectsByIdLimit(1,10);
