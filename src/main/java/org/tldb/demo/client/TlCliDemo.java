@@ -2,6 +2,8 @@ package org.tldb.demo.client;
 
 import io.github.donnie4w.tldb.tlcli.*;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,13 +17,20 @@ public class TlCliDemo {
     public static void main(String[] args) throws Exception {
         Client client = new Client();
         client.newConnect(false, "127.0.0.1", 7100, "mycli=123");
+
+        Map<String, ColumnType> cmap = new HashMap<>();
+        cmap.put("classroom", ColumnType.STRING);
+        cmap.put("teacher", ColumnType.BINARY);
+        cmap.put("level", ColumnType.INT16);
+        cmap.put("number", ColumnType.INT64);
+
         //建表
-        client.createTable("school", new String[]{"classroom", "teacher", "student"}, new String[]{"classroom", "teacher"});
+        client.createTable("school", cmap, new String[]{"classroom", "level"});
 
         //新增数据
-        insert(client,1);
+        insert(client, 1);
 
-//        update(client, 1, 33);
+        //update(client, 1, 33);
 
         //表当前最大id
         System.out.println("selectId>>" + client.selectId("school"));
@@ -60,7 +69,8 @@ public class TlCliDemo {
         Map<String, byte[]> m = new HashMap<>();
         m.put("classroom", ("class" + i).getBytes(StandardCharsets.UTF_8));
         m.put("teacher", ("teacher" + i).getBytes(StandardCharsets.UTF_8));
-        m.put("student", ("student" + i).getBytes(StandardCharsets.UTF_8));
+        m.put("level", ByteBuffer.allocate(Short.BYTES).order(ByteOrder.BIG_ENDIAN).putShort((short) (1 << 10)).array());
+        m.put("number", ByteBuffer.allocate(Long.BYTES).order(ByteOrder.BIG_ENDIAN).putLong(1L << 33).array());
         AckBean ab = client.insert("school", m);
         return ab.seq;
     }
